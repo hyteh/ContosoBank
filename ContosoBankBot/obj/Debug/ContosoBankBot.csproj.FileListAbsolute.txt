@@ -37,3 +37,12 @@ c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot
 c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\obj\Debug\ContosoBankBot.csprojResolveAssemblyReference.cache
 c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\obj\Debug\Bot Application1.dll
 c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\obj\Debug\Bot Application1.pdb
+c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.WindowsAzure.Mobile.dll
+c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.WindowsAzure.Mobile.Ext.dll
+c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Net.Http.Extensions.dll
+c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Net.Http.Primitives.dll
+c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.WindowsAzure.Mobile.xml
+c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.WindowsAzure.Mobile.Ext.xml
+c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Net.Http.Extensions.xml
+c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Net.Http.Primitives.xml
+c:\users\yie\documents\visual studio 2015\Projects\ContosoBankBot\ContosoBankBot\obj\Debug\ContosoBankBot.csproj.App.config
