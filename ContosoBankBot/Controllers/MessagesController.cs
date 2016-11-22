@@ -19,150 +19,254 @@ namespace ContosoBankBot
         /// POST: api/Messages
         /// Receive a message from a user and reply to it
         /// </summary>
+
         public async Task<HttpResponseMessage> Post([FromBody]Activity activity)
         {
             if (activity.Type == ActivityTypes.Message)
             {
-                //Initialize objects
+                /*Initialize objects*/
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
+
                 StateClient stateClient = activity.GetStateClient();
                 BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
-
+                
                 var userMessage = activity.Text;
-                string endOutput = "Hello, welcome to Contoso Bank's Bot!";
+                string endOutput = "";
 
-                //Say hi to start bot
-                if (userData.GetProperty<bool>("FirstTime"))
+                /*Greeting*/
+                if (userData.GetProperty<bool>("SentGreeting"))
                 {
-                    endOutput = "Hello again!";
+                    endOutput = "Hello again";
                 }
-
                 else
                 {
-                    userData.SetProperty<bool>("FirstTime", true);
+                    endOutput = "Hello, welcome to Consoto Bank's Bot!";
+                    userData.SetProperty<bool>("SentGreeting", true);
                     await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
                 }
 
+                /*Clear*/
                 if (userMessage.ToLower().Contains("clear"))
                 {
                     endOutput = "User data cleared";
                     await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                     
                 }
-                
-                //Check accounts
-                if (userMessage.ToLower().Equals("get account"))
-                {
-                    List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
-                    bool isEmpty = bankAccount.Count == 0;
 
-                    //Check if db is empty
-                    if (isEmpty)
+                /*Get username*/
+                if (userMessage.ToLower().Contains("name"))
+                {
+                    string name = userMessage.Split()[1];
+                    userData.SetProperty<string>("username", name);
+                    await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                    endOutput = "Welcome, " + userData.GetProperty<string>("username") + "!";
+                }
+                
+                var input = userMessage.Split();
+                string username = userData.GetProperty<string>("username");
+
+                if (username == null)
+                {
+                    endOutput += "\n\n Please enter a username.";
+                }
+                else
+                {
+                    /*Create account*/
+                    if (input.Length == 3 && userMessage.ToLower().Contains("create account"))
                     {
-                        endOutput = "No accounts available.";
-                    }
-                    //Else search if db has same account name
-                    else
-                    {
+                        //Get user's account
+                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
+                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
                         foreach (BankAccount a in bankAccount)
                         {
-                            endOutput = "ID: " + a.ID + "\n\n Owner name: " + a.accountName + "\n\n Balance: " + a.balance + "\n\n Account created at: " + a.date + "\n\n";
+                            if (a.owner == username)
+                            {
+                                userBankAcc.Add(a);
+                            }
                         }
-                    }
-                   
-                }
-
-                //Create account
-                var input = userMessage.Split();
-                if (input.Length == 3 && userMessage.ToLower().Contains("create account"))
-                {
-                    List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
-                    bool isEmpty = bankAccount.Count==0;
-                    //Check if db is empty
-                    if (isEmpty){
+                        
+                        int newAccNo = userBankAcc.Count + 1;
+                        //Create new account in db
                         BankAccount account = new BankAccount()
                         {
-                            accountName = input[2].Trim(),
+                            owner = username,
+                            accountNo = newAccNo,
+                            balance = Double.Parse(input[2]),
                             date = DateTime.Now
                         };
                         await AzureManager.AzureManagerInstance.CreateAccount(account);
-                        endOutput = "New account created at " + account.date;
+                        endOutput = "Owner: " + account.owner + " \n\n New Account " + account.accountNo + " created at " + account.date;
                     }
-                    //Else search if db has same account name
-                    else
+
+                    /*Check account*/
+                    if (userMessage.ToLower().Contains("get account"))
                     {
+                        //Get user's account
+                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
+                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
                         foreach (BankAccount a in bankAccount)
                         {
-                            if (a.accountName == input[2].Trim())
+                            if (a.owner == username)
                             {
-                                endOutput = "Account already exists.";
+                                userBankAcc.Add(a);
+                            }
+                        }
+                        //Check if user has any accounts
+                        if (userBankAcc.Count == 0)
+                        {
+                            endOutput = "No accounts available.";
+                        }
+                        //Else get the accounts
+                        else
+                        {
+                            endOutput = "Here are your accounts, " + username + ": \n\n";
+                            foreach (BankAccount a in userBankAcc)
+                            {
+                                endOutput += "Account Number: " + a.accountNo + "\n\r Balance: $" + a.balance + "\n\r Account created at: " + a.date + "\n\n";
+                            }
+                        }
+                    }
+
+                    /*Add balance*/
+                    if (userMessage.ToLower().Contains("add balance"))
+                    {
+                        //Get user's account
+                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
+                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
+                        foreach (BankAccount a in bankAccount)
+                        {
+                            if (a.owner == username)
+                            {
+                                userBankAcc.Add(a);
+                            }
+                        }
+                        //Check if user has any accounts
+                        if (userBankAcc.Count == 0)
+                        {
+                            endOutput = "No accounts available.";
+                        }
+                        //Else get the accounts
+                        else
+                        {
+                            //Adding balance
+                            if (input.Length == 4)
+                            {
+                                foreach (BankAccount a in userBankAcc)
+                                {
+                                    int accountNo = Int32.Parse(input[2]);
+                                    double balance = Double.Parse(input[3]);
+                                    if (accountNo == a.accountNo)
+                                    {
+                                        a.balance = a.balance + balance;
+                                        await AzureManager.AzureManagerInstance.UpdateBalance(a);
+                                        endOutput = "Balance updated! $" + balance + " added to Account " + a.accountNo + "\n\n New Balance = $" + a.balance;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        endOutput = "Please insert the correct account number";
+                                    }
+                                }
                             }
                             else
                             {
-                                BankAccount account = new BankAccount()
-                                {
-                                    accountName = input[2].Trim(),
-                                    date = DateTime.Now
-                                };
-                                await AzureManager.AzureManagerInstance.CreateAccount(account);
-                                endOutput = "New account created at " + account.date;
+                                endOutput = "Please insert the account number and balance amount.";
                             }
                         }
                     }
-                }
 
-                //Add balance
-                if (userMessage.ToLower().Contains("add balance"))
-                {
-                    if (input.Length == 4)
+                    /*Withdraw balance*/
+                    if (userMessage.ToLower().Contains("withdraw balance"))
                     {
+                        //Get user's account
                         List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
+                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
                         foreach (BankAccount a in bankAccount)
                         {
-                            if (input[2].Trim().ToLower() == a.accountName.ToLower()){
-                                a.balance = a.balance + Int32.Parse(input[3]);
-                                await AzureManager.AzureManagerInstance.UpdateBalance(a);
-                                endOutput = "Balance updated! \n\n New Balance = " + a.balance;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        endOutput = "Please insert account name and balance amount.";
-                    }
-                }
-
-
-                //Subtract balance
-                if (userMessage.ToLower().Contains("remove balance"))
-                {
-                    if (input.Length == 4)
-                    {
-                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
-                        foreach (BankAccount a in bankAccount)
-                        {
-                            if (input[2].Trim().ToLower() == a.accountName.ToLower())
+                            if (a.owner == username)
                             {
-                                if (a.balance - Int32.Parse(input[3]) <= 0){
-                                    endOutput = "Not enough balance to remove.";
-                                }
-                                else
+                                userBankAcc.Add(a);
+                            }
+                        }
+                        //Check if user has any accounts
+                        if (userBankAcc.Count == 0)
+                        {
+                            endOutput = "No accounts available.";
+                        }
+                        else
+                        {
+                            //Removing balance
+                            if (input.Length == 4)
+                            {
+                                int accountNo = Int32.Parse(input[2]);
+                                double balance = Double.Parse(input[3]);
+                                foreach (BankAccount a in userBankAcc)
                                 {
-                                    a.balance = a.balance - Int32.Parse(input[3]);
-                                    await AzureManager.AzureManagerInstance.UpdateBalance(a);
-                                    endOutput = "Balance updated! \n\n New Balance = " + a.balance;
+                                    if (accountNo == a.accountNo)
+                                    {
+                                        if (a.balance - balance <= 0)
+                                        {
+                                            endOutput = "Not enough balance to remove.";
+                                        }
+                                        else
+                                        {
+                                            a.balance = a.balance - balance;
+                                            await AzureManager.AzureManagerInstance.UpdateBalance(a);
+                                            endOutput = "Balance updated! $" + balance + " withdrawn from Account " + a.accountNo + "\n\n New Balance = $" + a.balance;
+                                        }
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        endOutput = "Please insert the correct account number.";
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                endOutput = "Please insert the account number and balance amount.";
+                            }
+                        }
+                    }
+
+                    /*Delete account*/
+                    if (input.Length == 3 && userMessage.ToLower().Contains("delete account"))
+                    {
+                        //Get user's account
+                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
+                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
+
+                        foreach (BankAccount a in bankAccount)
+                        {
+                            if (a.owner == userData.GetProperty<string>("username"))
+                            {
+                                userBankAcc.Add(a);
+                            }
+                        }
+                        //Check if user has any accounts
+                        if (userBankAcc.Count == 0)
+                        {
+                            endOutput = "No accounts available.";
+                        }
+                        else
+                        {
+                            //Deleting account
+                            int accountNo = Int32.Parse(input[2]);
+                            foreach (BankAccount a in userBankAcc)
+                            {
+                                if (accountNo == a.accountNo)
+                                {
+                                    await AzureManager.AzureManagerInstance.DeleteAccount(a);
+                                    endOutput = "Deleted: Account " + a.accountNo;
+                                    break;
                                 }
                             }
                         }
                     }
-                    else
-                    {
-                        endOutput = "Please insert the correct account name and balance amount.";
-                    }
                 }
-
+                
                 //Check currency rate or stock API
-
+                
                 // return our reply to the user
                 Activity reply = activity.CreateReply(endOutput);
                 await connector.Conversations.ReplyToActivityAsync(reply);

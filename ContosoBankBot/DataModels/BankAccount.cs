@@ -11,8 +11,11 @@ namespace ContosoBankBot.DataModels
         [JsonProperty(PropertyName = "Id")]
         public string ID { get; set; }
 
-        [JsonProperty(PropertyName = "accountName")]
-        public string accountName { get; set; }
+        [JsonProperty(PropertyName = "owner")]
+        public string owner { get; set; }
+
+        [JsonProperty(PropertyName = "accountNo")]
+        public int accountNo { get; set; }
 
         [JsonProperty(PropertyName = "balance")]
         public double balance { get; set; }

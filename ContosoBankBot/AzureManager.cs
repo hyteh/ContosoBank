@@ -53,5 +53,10 @@ namespace ContosoBankBot
         {
             await this.bankAccountTable.UpdateAsync(account);
         }
+
+        public async Task DeleteAccount(BankAccount account)
+        {
+            await this.bankAccountTable.DeleteAsync(account);
+        }
     }
 }
