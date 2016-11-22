@@ -20,14 +20,11 @@ C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Autofac.xml
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.Bot.Builder.xml
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.Bot.Connector.xml
-C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.IdentityModel.Protocol.Extensions.pdb
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.IdentityModel.Protocol.Extensions.xml
-C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.Rest.ClientRuntime.xml
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.WindowsAzure.Configuration.xml
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.WindowsAzure.Mobile.xml
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.WindowsAzure.Mobile.Ext.xml
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Newtonsoft.Json.xml
-C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.IdentityModel.Tokens.Jwt.pdb
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.IdentityModel.Tokens.Jwt.xml
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Net.Http.Extensions.xml
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Net.Http.Formatting.xml
@@ -46,3 +43,24 @@ C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\obj\Release\ContosoBankBot.csprojResolveAssemblyReference.cache
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\obj\Release\Bot Application1.dll
 C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\obj\Release\Bot Application1.pdb
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.Identity.Client.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.Identity.Client.Platform.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.IdentityModel.Clients.ActiveDirectory.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.IdentityModel.Logging.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.IdentityModel.Tokens.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.Win32.Primitives.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Diagnostics.DiagnosticSource.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Runtime.Serialization.Primitives.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Security.Cryptography.Algorithms.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Security.Cryptography.Encoding.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Security.Cryptography.Primitives.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Security.Cryptography.X509Certificates.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.Identity.Client.xml
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.Identity.Client.Platform.xml
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.IdentityModel.Clients.ActiveDirectory.xml
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\Microsoft.IdentityModel.Tokens.xml
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\System.Diagnostics.DiagnosticSource.xml
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\cs\Microsoft.Bot.Builder.resources.dll
+C:\Users\Yie\Documents\Visual Studio 2015\Projects\ContosoBankBot\ContosoBankBot\bin\de-dE\Microsoft.Bot.Builder.resources.dll

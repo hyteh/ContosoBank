@@ -49,6 +49,12 @@ namespace ContosoBankBot
             return await this.bankAccountTable.ToListAsync();
         }
       
+        public async Task<List<BankAccount>> GetUserAccount(string username)
+        {
+            return await this.bankAccountTable
+                .Where(BankAccount => BankAccount.owner == username)
+                .ToListAsync();
+        }
         public async Task UpdateBalance(BankAccount account)
         {
             await this.bankAccountTable.UpdateAsync(account);

@@ -9,6 +9,9 @@ using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using ContosoBankBot.DataModels;
+using ContosoBankBot.Models;
+using static ContosoBankBot.Models.CurrencyExchange;
+using System.Reflection;
 
 namespace ContosoBankBot
 {
@@ -36,7 +39,7 @@ namespace ContosoBankBot
                 /*Greeting*/
                 if (userData.GetProperty<bool>("SentGreeting"))
                 {
-                    endOutput = "Hello again";
+                    endOutput = "Hello again!";
                 }
                 else
                 {
@@ -48,7 +51,7 @@ namespace ContosoBankBot
                 /*Clear*/
                 if (userMessage.ToLower().Contains("clear"))
                 {
-                    endOutput = "User data cleared";
+                    endOutput = "User data cleared.";
                     await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                     
                 }
@@ -74,18 +77,10 @@ namespace ContosoBankBot
                     /*Create account*/
                     if (input.Length == 3 && userMessage.ToLower().Contains("create account"))
                     {
-                        //Get user's account
-                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
-                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
-                        foreach (BankAccount a in bankAccount)
-                        {
-                            if (a.owner == username)
-                            {
-                                userBankAcc.Add(a);
-                            }
-                        }
-                        
+                        //Get user's bank accounts
+                        List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
                         int newAccNo = userBankAcc.Count + 1;
+
                         //Create new account in db
                         BankAccount account = new BankAccount()
                         {
@@ -101,16 +96,9 @@ namespace ContosoBankBot
                     /*Check account*/
                     if (userMessage.ToLower().Contains("get account"))
                     {
-                        //Get user's account
-                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
-                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
-                        foreach (BankAccount a in bankAccount)
-                        {
-                            if (a.owner == username)
-                            {
-                                userBankAcc.Add(a);
-                            }
-                        }
+                        //Get user's bank accounts
+                        List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+                        
                         //Check if user has any accounts
                         if (userBankAcc.Count == 0)
                         {
@@ -130,16 +118,9 @@ namespace ContosoBankBot
                     /*Add balance*/
                     if (userMessage.ToLower().Contains("add balance"))
                     {
-                        //Get user's account
-                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
-                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
-                        foreach (BankAccount a in bankAccount)
-                        {
-                            if (a.owner == username)
-                            {
-                                userBankAcc.Add(a);
-                            }
-                        }
+                        //Get user's bank accounts
+                        List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+
                         //Check if user has any accounts
                         if (userBankAcc.Count == 0)
                         {
@@ -178,16 +159,9 @@ namespace ContosoBankBot
                     /*Withdraw balance*/
                     if (userMessage.ToLower().Contains("withdraw balance"))
                     {
-                        //Get user's account
-                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
-                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
-                        foreach (BankAccount a in bankAccount)
-                        {
-                            if (a.owner == username)
-                            {
-                                userBankAcc.Add(a);
-                            }
-                        }
+                        //Get user's bank accounts
+                        List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+                       
                         //Check if user has any accounts
                         if (userBankAcc.Count == 0)
                         {
@@ -232,17 +206,9 @@ namespace ContosoBankBot
                     /*Delete account*/
                     if (input.Length == 3 && userMessage.ToLower().Contains("delete account"))
                     {
-                        //Get user's account
-                        List<BankAccount> bankAccount = await AzureManager.AzureManagerInstance.GetAccount();
-                        List<BankAccount> userBankAcc = new List<DataModels.BankAccount>();
-
-                        foreach (BankAccount a in bankAccount)
-                        {
-                            if (a.owner == userData.GetProperty<string>("username"))
-                            {
-                                userBankAcc.Add(a);
-                            }
-                        }
+                        //Get user's bank accounts
+                        List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+                        
                         //Check if user has any accounts
                         if (userBankAcc.Count == 0)
                         {
@@ -260,13 +226,33 @@ namespace ContosoBankBot
                                     endOutput = "Deleted: Account " + a.accountNo;
                                     break;
                                 }
+                                else
+                                {
+                                    endOutput = "Please insert the correct account number.";
+                                }
                             }
                         }
                     }
                 }
                 
-                //Check currency rate or stock API
-                
+                //Check currency rate API
+                if (input.Length == 4 && userMessage.ToLower().Contains("currency rate"))
+                {
+                    CurrencyExchange.RootObject rootObject;
+                    HttpClient client = new HttpClient();
+                    string baseCurrency = input[2].ToUpper();
+                    string exchangeCurrency = input[3].ToUpper();
+
+                    string result = await client.GetStringAsync(new Uri("http://api.fixer.io/latest?base=" + baseCurrency + "&symbols=" + exchangeCurrency));
+                    rootObject = JsonConvert.DeserializeObject<CurrencyExchange.RootObject>(result);
+                    
+                    PropertyInfo prop = typeof(Rates).GetProperty(input[3].ToUpper());
+                    
+                    var value = prop.GetValue(rootObject.rates, null);
+                    endOutput = "Base currency: " + baseCurrency + "\n\n Exchange rate: " + exchangeCurrency + " " + value.ToString();
+                }
+
+
                 // return our reply to the user
                 Activity reply = activity.CreateReply(endOutput);
                 await connector.Conversations.ReplyToActivityAsync(reply);
