@@ -190,6 +190,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="AzureManager.cs" />
+    <Compile Include="ConsotoBankBotDialog.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="DataModels\BankAccount.cs" />
     <Compile Include="Global.asax.cs">
