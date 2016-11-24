@@ -373,7 +373,7 @@ namespace ContosoBankBot
                 {
                     List<BankAccount> userAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username); //Get user account 
                     List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserBankAccount(username); //Get user's bank accounts
-                    
+                    string endOutput = "";
                     var message = await argument as Activity;
                     Activity replyToConversation = message.CreateReply("");
                     replyToConversation.Recipient = message.From;
@@ -404,48 +404,20 @@ namespace ContosoBankBot
                         };
                         Attachment plAttachment = plCard.ToAttachment();
                         replyToConversation.Attachments.Add(plAttachment);
+                        await context.PostAsync(replyToConversation);
                     }
 
                     //Else get the bank accounts -- success
                     else
-                    {   //Display as receipt cards
-                        List<CardImage> cardImages = new List<CardImage>();
-                        cardImages.Add(new CardImage(url: "http://4seizoenen-public.sharepoint.com/SiteAssets/logo/Contoso-Blue.png"));
-
-                        //Buttons
-                        List<CardAction> cardButtons = new List<CardAction>();
-                        CardAction cardButton1 = new CardAction()
-                        {
-                            Type = "imBack",
-                            Title = "Continue",
-                            Value = "Ok",
-                        };
-                        cardButtons.Add(cardButton1);
-
-                        //Accounts
-                        List<ReceiptItem> accounts = new List<ReceiptItem>();
+                    {
+                        endOutput = "Here are your accounts, " + userAcc[0].Name + ": \n\n";
                         foreach (BankAccount a in userBankAcc)
                         {
-                            ReceiptItem item = new ReceiptItem()
-                            {
-                                Title = "Account number: " + a.accountNo,
-                                Subtitle = "Owner: " + userAcc[0].Name,
-                                Text = "\n Balance: $" + a.balance.ToString() + "\n" + "Created at: " + a.date,
-                                Image = new CardImage(url: "https://cdn4.iconfinder.com/data/icons/pretty_office_3/128/sign-up.png")
-                            };
-                            accounts.Add(item);
+                            endOutput += "Account Number: " + a.accountNo + "\n\r Balance: $" + a.balance + "\n\r Account created at: " + a.date + "\n\n";
                         }
-
-                        ReceiptCard plCard = new ReceiptCard()
-                        {
-                            Title = "Here are your account(s), " + userAcc[0].Name + ":\n\n",
-                            Buttons = cardButtons,
-                            Items = accounts,
-                        };
-                        Attachment plAttachment = plCard.ToAttachment();
-                        replyToConversation.Attachments.Add(plAttachment);
+                        await context.PostAsync(endOutput);
+                        await context.PostAsync("Enter any key to continue.");
                     }
-                    await context.PostAsync(replyToConversation);
                     context.Wait(promptJobs);
                 }
 
@@ -884,7 +856,7 @@ namespace ContosoBankBot
                     Value = "Ok",
                 };
                 cardButtons.Add(cardButton1);
-                ThumbnailCard plCard = new ThumbnailCard(text: "Base currency: " + baseCurrency + "\n\n, Exchange rate: " + exchangeCurrency + " " + value.ToString(),
+                ThumbnailCard plCard = new ThumbnailCard(text: "Base currency: " + baseCurrency + "\n\n Exchange rate: " + exchangeCurrency + " " + value.ToString(),
                                                         buttons: cardButtons,
                                                         images: cardImages);
                 Attachment plAttachment = plCard.ToAttachment();
