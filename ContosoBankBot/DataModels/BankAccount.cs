@@ -11,9 +11,20 @@ namespace ContosoBankBot.DataModels
         [JsonProperty(PropertyName = "Id")]
         public string ID { get; set; }
 
-        [JsonProperty(PropertyName = "owner")]
-        public string owner { get; set; }
+        [JsonProperty(PropertyName = "PartitionKey")]
+        public string partitionKey { get; set; } //User or account
 
+        [JsonProperty(PropertyName = "username")]
+        public string username { get; set; } //Username 
+
+        /*User*/
+        [JsonProperty(PropertyName = "password")]
+        public string password { get; set; }
+
+        [JsonProperty(PropertyName = "Name")]
+        public string Name { get; set; }
+
+        /*Account*/
         [JsonProperty(PropertyName = "accountNo")]
         public int accountNo { get; set; }
 
@@ -22,7 +33,6 @@ namespace ContosoBankBot.DataModels
 
         [JsonProperty(PropertyName = "createdAt")]
         public DateTime date { get; set; }
-
-
     }
 }
+

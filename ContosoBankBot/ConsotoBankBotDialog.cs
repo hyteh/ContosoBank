@@ -19,37 +19,159 @@ namespace ContosoBankBot
         }
         public virtual async Task MessageReceivedAsync(IDialogContext context, IAwaitable<IMessageActivity> argument)
         {
-            await context.PostAsync("Welcome to Contoso Bank's Bot! Please enter your name.");
+            await context.PostAsync("Welcome to Contoso Bank's Bot! Please enter your username or create a new user account.");
             context.Wait(InputUsername);
         }
 
         public virtual async Task InputUsername(IDialogContext context, IAwaitable<IMessageActivity> argument)
         {
             var msg = await argument;
-            username = msg.Text;
-            PromptDialog.Confirm(
+            if (msg.Text.Contains("create new user account"))
+            {
+                string endOutput = "Please enter username, password and name to be created (in that order).";
+                await context.PostAsync(endOutput);
+                context.Wait(createNewAccount);
+            }
+            else
+            {
+                username = msg.Text;
+                PromptDialog.Confirm(
                     context,
                     confirmUsername,
-                    "Is " + username + " your name?",
+                    "Is " + username + " your username?",
                     "Didn't get that!",
                     promptStyle: PromptStyle.Auto);
+            }
         }
+
         public async Task confirmUsername(IDialogContext context, IAwaitable<bool> argument)
         {
             var confirm = await argument;
             if (confirm)
             {
-                string endOutput = "Hi, " + username + "! How may I help you?";
+                string endOutput = "Please enter your password.";
                 await context.PostAsync(endOutput);
-                context.Wait(jobs);
+                context.Wait(InputPassword);
             }
             else
             {
                 username = "";
-                await context.PostAsync("Please enter your name.");
+                await context.PostAsync("Please enter your username or create new user account.");
                 context.Wait(InputUsername);
             }
 
+        }
+
+        public virtual async Task InputPassword(IDialogContext context, IAwaitable<IMessageActivity> argument)
+        {
+            var msg = await argument;
+            string password = msg.Text;
+            List<BankAccount> userAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+
+            //Check if user has any accounts
+            if (userAcc.Count == 0)
+            {
+                PromptDialog.Confirm(
+                    context,
+                    checkNewAccount,
+                    "Invalid username. Create new user account?",
+                    "Didn't get that!",
+                    promptStyle: PromptStyle.Auto);
+            }
+            else
+            {
+                foreach (BankAccount a in userAcc)
+                {
+                    if (a.password == password)
+                    {
+                        string endOutput = "Login successful. \n\n Hi, " + a.Name + "! How may I help you?";
+                        await context.PostAsync(endOutput);
+                        context.Wait(jobs);
+                        break;
+                    }
+                    else
+                    {
+                        PromptDialog.Confirm(
+                        context,
+                        checkWrongPassword,
+                        "Wrong password. Change username?",
+                        "Didn't get that!",
+                        promptStyle: PromptStyle.Auto);
+                    }
+                }
+            }
+        }
+
+        public async Task checkNewAccount(IDialogContext context, IAwaitable<bool> argument)
+        {
+            var confirm = await argument;
+            if (confirm)
+            {
+                string endOutput = "Please enter username, password and name to be created (in that order).";
+                await context.PostAsync(endOutput);
+                context.Wait(createNewAccount);
+            }
+            else
+            {
+                username = "";
+                await context.PostAsync("Please enter your username or create new user account.");
+                context.Wait(InputUsername);
+            }
+
+        }
+
+        public async Task checkWrongPassword(IDialogContext context, IAwaitable<bool> argument)
+        {
+            var confirm = await argument;
+            if (confirm)
+            {
+                username = "";
+                await context.PostAsync("Please enter your username or create new user account.");
+                context.Wait(InputUsername);
+            }
+            else
+            {
+                await context.PostAsync("Please enter your password.");
+                context.Wait(InputPassword);
+            }
+        }
+
+        public virtual async Task createNewAccount(IDialogContext context, IAwaitable<IMessageActivity> argument)
+        {
+            var msg = await argument;
+            var input = msg.Text.Split();
+            string endOutput = "";
+            username = input[0];
+            string password = input[1];
+            string name = "";
+            //Get name
+            for(int i = 2; i<input.Length; i++)
+            {
+                name += input[i];
+            }
+            List<BankAccount> userAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+
+            //Check if user has any accounts
+            if (userAcc.Count != 0) //Username already exist
+            {
+                endOutput = "Username already exists. Please enter another one";
+                await context.PostAsync(endOutput);
+                context.Wait(createNewAccount);
+            }
+            else
+            {
+                BankAccount account = new BankAccount()
+                {
+                    partitionKey = "user",
+                    username = username,
+                    password = password,
+                    Name = name
+                };
+                await AzureManager.AzureManagerInstance.CreateAccount(account);
+                endOutput = "Account created! Hi, " + account.Name + "! How may I help you?";
+                await context.PostAsync(endOutput);
+                context.Wait(jobs);
+            }
         }
 
         public async Task jobs(IDialogContext context, IAwaitable<IMessageActivity> argument)
@@ -57,17 +179,18 @@ namespace ContosoBankBot
             var msg = await argument;
             if (msg.Text == "get accounts")
             {
-                List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+                List<BankAccount> userAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username); //Get user account 
+                List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserBankAccount(username); //Get user's bank accounts
 
                 //Check if user has any accounts
                 if (userBankAcc.Count == 0)
                 {
-                    await context.PostAsync("No accounts available.");
+                    await context.PostAsync("No accounts available. What else can I do for you?");
                 }
                 //Else get the accounts
                 else
                 {
-                    string endOutput = "Here are your accounts, " + username + ": \n\n";
+                    string endOutput = "Here are your accounts, " + userAcc[0].Name + ": \n\n";
                     foreach (BankAccount a in userBankAcc)
                     {
                         endOutput += "Account Number: " + a.accountNo + "\n\r Balance: $" + a.balance + "\n\r Account created at: " + a.date + "\n\n";
@@ -104,20 +227,21 @@ namespace ContosoBankBot
         public async Task createAccount(IDialogContext context, IAwaitable<IMessageActivity> argument)
         {
             var msg = await argument;
-            //Get user's bank accounts
-            List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+            List<BankAccount> userAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username); //Get user account 
+            List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserBankAccount(username); //Get user's bank accounts
             int newAccNo = userBankAcc.Count + 1;
 
             //Create new account in db
             BankAccount account = new BankAccount()
             {
-                owner = username,
+                partitionKey = "account",
+                username = username,
                 accountNo = newAccNo,
                 balance = Double.Parse(msg.Text),
                 date = DateTime.Now
             };
             await AzureManager.AzureManagerInstance.CreateAccount(account);
-            string endOutput = "Owner: " + account.owner + " \n\n New Account " + account.accountNo + " created at " + account.date;
+            string endOutput = "Owner: " + userAcc[0].Name + " \n\n New Account " + account.accountNo + " successfully created at " + account.date + ".";
             await context.PostAsync(endOutput);
             context.Wait(jobs);
         }
@@ -127,14 +251,13 @@ namespace ContosoBankBot
             var msg = await argument;
             var input = msg.Text.Split();
             string endOutput = "";
-
-            //Get user's bank accounts
-            List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+            
+            List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserBankAccount(username); //Get user's bank accounts
 
             //Check if user has any accounts
             if (userBankAcc.Count == 0)
             {
-                endOutput = "No accounts available.";
+                endOutput = "No accounts available. What else can I do for you?";
             }
             //Else get the accounts
             else
@@ -174,8 +297,7 @@ namespace ContosoBankBot
             var input = msg.Text.Split();
             string endOutput = "";
 
-            //Get user's bank accounts
-            List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+            List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserBankAccount(username); //Get user's bank accounts
 
             //Check if user has any accounts
             if (userBankAcc.Count == 0)
@@ -226,8 +348,7 @@ namespace ContosoBankBot
             var input = msg.Text.Split();
             string endOutput = "";
 
-            //Get user's bank accounts
-            List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserAccount(username);
+            List<BankAccount> userBankAcc = await AzureManager.AzureManagerInstance.GetUserBankAccount(username); //Get user's bank accounts
 
             //Check if user has any accounts
             if (userBankAcc.Count == 0)
