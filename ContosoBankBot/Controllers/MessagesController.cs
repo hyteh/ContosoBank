@@ -29,6 +29,7 @@ namespace ContosoBankBot
             if (activity.Type == ActivityTypes.Message)
             {
                 await Conversation.SendAsync(activity, () => new ConsotoBankBotDialog());
+
                 /*Initialize objects*/
                 /*ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
 
@@ -249,7 +250,6 @@ namespace ContosoBankBot
                     rootObject = JsonConvert.DeserializeObject<CurrencyExchange.RootObject>(result);
                     
                     PropertyInfo prop = typeof(Rates).GetProperty(input[3].ToUpper());
-                    
                     var value = prop.GetValue(rootObject.rates, null);
                     endOutput = "Base currency: " + baseCurrency + "\n\n Exchange rate: " + exchangeCurrency + " " + value.ToString();
                 }

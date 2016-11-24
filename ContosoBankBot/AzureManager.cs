@@ -43,12 +43,7 @@ namespace ContosoBankBot
         {
             await this.bankAccountTable.InsertAsync(account);
         }
-
-        public async Task<List<BankAccount>> GetAccount()
-        {
-            return await this.bankAccountTable.ToListAsync();
-        }
-      
+    
         public async Task<List<BankAccount>> GetUserAccount(string username)
         {
             return await this.bankAccountTable
