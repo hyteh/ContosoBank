@@ -43,18 +43,21 @@ namespace ContosoBankBot
         {
             await this.bankAccountTable.InsertAsync(account);
         }
-
-        public async Task<List<BankAccount>> GetAccount()
-        {
-            return await this.bankAccountTable.ToListAsync();
-        }
-      
+    
         public async Task<List<BankAccount>> GetUserAccount(string username)
         {
             return await this.bankAccountTable
-                .Where(BankAccount => BankAccount.owner == username)
+                .Where(BankAccount => BankAccount.partitionKey == "user" & BankAccount.username == username)
                 .ToListAsync();
         }
+
+        public async Task<List<BankAccount>> GetUserBankAccount(string username)
+        {
+            return await this.bankAccountTable
+                .Where(BankAccount => BankAccount.partitionKey == "account" & BankAccount.username == username)
+                .ToListAsync();
+        }
+
         public async Task UpdateBalance(BankAccount account)
         {
             await this.bankAccountTable.UpdateAsync(account);

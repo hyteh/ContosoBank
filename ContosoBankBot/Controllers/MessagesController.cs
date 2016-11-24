@@ -12,6 +12,7 @@ using ContosoBankBot.DataModels;
 using ContosoBankBot.Models;
 using static ContosoBankBot.Models.CurrencyExchange;
 using System.Reflection;
+using Microsoft.Bot.Builder.Dialogs;
 
 namespace ContosoBankBot
 {
@@ -27,8 +28,10 @@ namespace ContosoBankBot
         {
             if (activity.Type == ActivityTypes.Message)
             {
+                await Conversation.SendAsync(activity, () => new ConsotoBankBotDialog());
+
                 /*Initialize objects*/
-                ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
+                /*ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
 
                 StateClient stateClient = activity.GetStateClient();
                 BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
@@ -36,19 +39,19 @@ namespace ContosoBankBot
                 var userMessage = activity.Text;
                 string endOutput = "";
 
-                /*Greeting*/
+                //Greeting
                 if (userData.GetProperty<bool>("SentGreeting"))
                 {
                     endOutput = "Hello again!";
                 }
                 else
                 {
-                    endOutput = "Hello, welcome to Consoto Bank's Bot!";
+                    endOutput = "Welcome to Consoto Bank's Bot!";
                     userData.SetProperty<bool>("SentGreeting", true);
                     await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
                 }
 
-                /*Clear*/
+                //Clear
                 if (userMessage.ToLower().Contains("clear"))
                 {
                     endOutput = "User data cleared.";
@@ -56,13 +59,13 @@ namespace ContosoBankBot
                     
                 }
 
-                /*Get username*/
+                //Get username
                 if (userMessage.ToLower().Contains("name"))
                 {
                     string name = userMessage.Split()[1];
                     userData.SetProperty<string>("username", name);
                     await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
-                    endOutput = "Welcome, " + userData.GetProperty<string>("username") + "!";
+                    endOutput = "Hello, " + userData.GetProperty<string>("username") + "!";
                 }
                 
                 var input = userMessage.Split();
@@ -74,7 +77,7 @@ namespace ContosoBankBot
                 }
                 else
                 {
-                    /*Create account*/
+                    //Create account
                     if (input.Length == 3 && userMessage.ToLower().Contains("create account"))
                     {
                         //Get user's bank accounts
@@ -93,7 +96,7 @@ namespace ContosoBankBot
                         endOutput = "Owner: " + account.owner + " \n\n New Account " + account.accountNo + " created at " + account.date;
                     }
 
-                    /*Check account*/
+                    //Check account
                     if (userMessage.ToLower().Contains("get account"))
                     {
                         //Get user's bank accounts
@@ -115,7 +118,7 @@ namespace ContosoBankBot
                         }
                     }
 
-                    /*Add balance*/
+                    //Add balance
                     if (userMessage.ToLower().Contains("add balance"))
                     {
                         //Get user's bank accounts
@@ -156,7 +159,7 @@ namespace ContosoBankBot
                         }
                     }
 
-                    /*Withdraw balance*/
+                    //Withdraw balance
                     if (userMessage.ToLower().Contains("withdraw balance"))
                     {
                         //Get user's bank accounts
@@ -203,7 +206,7 @@ namespace ContosoBankBot
                         }
                     }
 
-                    /*Delete account*/
+                    //Delete account
                     if (input.Length == 3 && userMessage.ToLower().Contains("delete account"))
                     {
                         //Get user's bank accounts
@@ -247,15 +250,44 @@ namespace ContosoBankBot
                     rootObject = JsonConvert.DeserializeObject<CurrencyExchange.RootObject>(result);
                     
                     PropertyInfo prop = typeof(Rates).GetProperty(input[3].ToUpper());
-                    
                     var value = prop.GetValue(rootObject.rates, null);
                     endOutput = "Base currency: " + baseCurrency + "\n\n Exchange rate: " + exchangeCurrency + " " + value.ToString();
                 }
 
+                if (userMessage.ToLower().Equals("msa"))
+                {
+                    Activity replyToConversation = activity.CreateReply("MSA information");
+                    replyToConversation.Recipient = activity.From;
+                    replyToConversation.Type = "message";
+                    replyToConversation.Attachments = new List<Attachment>();
+                    List<CardImage> cardImages = new List<CardImage>();
+                    cardImages.Add(new CardImage(url: "https://cdn2.iconfinder.com/data/icons/ios-7-style-metro-ui-icons/512/MetroUI_iCloud.png"));
+                    List<CardAction> cardButtons = new List<CardAction>();
+                    CardAction plButton = new CardAction()
+                    {
+                        Value = "heyyyy",
+                        Type = "postBack",
+                        Title = "MSA Website"
+                    };
+                    cardButtons.Add(plButton);
+                    ThumbnailCard plCard = new ThumbnailCard()
+                    {
+                        Title = "Visit MSA",
+                        Subtitle = "The MSA Website is here",
+                        Images = cardImages,
+                        Buttons = cardButtons
+                    };
+                    Attachment plAttachment = plCard.ToAttachment();
+                    replyToConversation.Attachments.Add(plAttachment);
+                    await connector.Conversations.SendToConversationAsync(replyToConversation);
+
+                    return Request.CreateResponse(HttpStatusCode.OK);
+
+                }
 
                 // return our reply to the user
                 Activity reply = activity.CreateReply(endOutput);
-                await connector.Conversations.ReplyToActivityAsync(reply);
+                await connector.Conversations.ReplyToActivityAsync(reply);*/
             }
             else
             {
